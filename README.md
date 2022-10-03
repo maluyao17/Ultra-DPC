@@ -22,4 +22,5 @@
 
 ### Result:
 
-![modes](.\figure\modes.png)![dpc++ s2](.\figure\dpc++ s2.png)
+![modes](.\figure\modes.png)
+![dpc++ s2](.\figure\dpc++ s2.png)
