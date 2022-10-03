@@ -19,7 +19,3 @@
 * DPCpp_.py: DPC++ Laplacian matrix construction based on the Nxp matrix version.
 * Dpcpp_batch.py: DPC++ for Nxp large-scale Laplacian matrix calculation in batches.
 * Dataprocessing.py:  Functions related to data normalization and unitary processing operations.
-
-### Result:
-![modes](..\figure\modes.png)
-![dpc++ s2](..\figure\dpc++ s2.png)
