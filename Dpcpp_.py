@@ -121,6 +121,8 @@ class Dpcpp:
             self.before_sort = importance_sorted_
             self.after_sort = importance_sorted
             self.sample_cluster(importance_sorted, nneigh)
+        for i in range(0, N):
+            self.sample_label[i] = self.cluster[index_return[i]]
         endtime = datetime.datetime.now()
         # self.top_k = self.prototype[importance_sorted[0:self.k],:]
         # # self.plot_desicion()
