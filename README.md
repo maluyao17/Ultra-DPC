@@ -1,4 +1,4 @@
-## DPC++ : Density Peak Clustering based on Sampling
+## DPC++ : Random Walk in Local Density Peaks
 
 ### Runtime environment
 
