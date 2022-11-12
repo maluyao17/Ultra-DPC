@@ -1,6 +1,7 @@
 """
 DPCpp_.py :DPC++ Laplacian matrix construction based on the Nxp matrix version.
 """
+from site import sethelper
 import numpy as np
 from scipy.sparse import csr_matrix, coo_matrix
 from sklearn.preprocessing import MinMaxScaler
@@ -9,8 +10,9 @@ from Dataprocessing import load_Data, load_Data2, get_data, Euc_dist, normalize_
 import datetime
 from sklearn.cluster import KMeans
 import random
-import matplotlib.pyplot as plt
+import matplotlib.pylab as plt
 import seaborn as sns
+sns.set()
 
 scaler = MinMaxScaler(feature_range=(0, 1))
 
@@ -83,7 +85,7 @@ def random_Walk_ECPCS(similarity_mat, length):
 
 class Dpcpp:
 
-    def __init__(self, data, label, s, p, l, r=150):
+    def __init__(self, data, label, s, p, l, r=100):
         self.data = data
         self. label = label
         self.s = s
@@ -97,44 +99,78 @@ class Dpcpp:
     def fit(self):
         starttime = datetime.datetime.now()
         similarity_mat, Z, N, index_return = self.sample_Data()
-        rho = self.rho_creator(Z)
-        self.rho = rho
-        sim_, nneigh_, sort_rho_idx_ = self.simNeigh_creator(similarity_mat, rho, self.p)
-        self.before_sim = sim_
-        self.before_sort = sort_rho_idx_
-        self.before_Walk = similarity_mat
+        # similarity_mat_ = similarity_mat
+        # self.plot_desicion()
         similarity_mat = random_Walk_ECPCS(similarity_mat, self.l)
-        self.after_Walk = similarity_mat
         index_return = index_return.astype(np.int64)
+        rho = self.rho_creator(Z)
+        # sim_, nneigh_,sort_rho_idx_ = self.simNeigh_creator(similarity_mat_,rho,self.p)
 
-        # sim, nneigh = simNeigh_creator(rm_similiarity, rho, p, k)
+        # sim, nneigh = self.simNeigh_creator(similiarity, rho, p, k)
         sim, nneigh, sort_rho_idx = self.simNeigh_creator(similarity_mat, rho, self.p)
-        self.after_sim = sim
-        self.after_sort = sort_rho_idx
         core_index = [x for (x, y) in enumerate(nneigh) if y == -1]
-
+        # core_index_ = [x for (x, y) in enumerate(nneigh_) if y == -1]
+        # importance_sorted_ = self.topK_selection(sim_, rho, self.k)
         nneigh, topK = self.DC_inter_dominance_estimation(rho, nneigh, core_index, sort_rho_idx, similarity_mat)
-        
+        # nneigh_, topK_ = self.DC_inter_dominance_estimation(rho, nneigh_, core_index_, sort_rho_idx_, similarity_mat_)
+        # self.plot_desicion(importance_sorted_, rho, sim_)
+        # self.plot_heatmap(similarity_mat_)
+        # self.plot_heatmap(similarity_mat)
         if type(topK) == int:
             importance_sorted = self.topK_selection(sim, rho, self.k)
-            importance_sorted_ = self.topK_selection(self.before_sim, rho, self.k)
-            self.before_sort = importance_sorted_
-            self.after_sort = importance_sorted
-            self.sample_cluster(importance_sorted, nneigh)
+            self.plot_desicion(importance_sorted, rho, sim)
+            self.sample_cluster(sort_rho_idx, nneigh)
         for i in range(0, N):
             self.sample_label[i] = self.cluster[index_return[i]]
+        
+        self.top_k = self.prototype[importance_sorted[0:self.k],:]
+        self.plot_sample1(self.data, self.shulffle, self.prototype, self.top_k)
+        self.plot_sample2(self.data, self.shulffle, self.prototype, self.top_k)
+        self.plot_sample3(self.data, self.shulffle, self.prototype, self.top_k)
+        self.plot_sample4(self.data, self.shulffle, self.prototype, self.top_k)
+        self.plot0 = []
+        self.plot1 = []
+        self.plot2 = []
+        self.plot3 = []
+        self.plot4 = []
+        self.plot5 = []
+        self.plot6 = []
+        self.plot7 = []
+        self.plot8 = []
+        self.plot9 = []
+
+
+        for i in range(0, N):
+            self.sample_label[i] = self.cluster[index_return[i]]
+            if self.cluster[index_return[i]] == 0:
+                self.plot0.append(i)
+            elif self.cluster[index_return[i]] == 1:
+                self.plot1.append(i)
+            elif self.cluster[index_return[i]] == 2:
+                self.plot2.append(i)
+            elif self.cluster[index_return[i]] == 3:
+                self.plot3.append(i)
+            elif self.cluster[index_return[i]] == 4:
+                self.plot4.append(i)
+            elif self.cluster[index_return[i]] == 5:
+                self.plot5.append(i)
+            elif self.cluster[index_return[i]]== 6:
+                self.plot6.append(i)
+            elif self.cluster[index_return[i]] == 7:
+                self.plot7.append(i)
+            elif self.cluster[index_return[i]] == 8:
+                self.plot8.append(i)
+            elif self.cluster[index_return[i]] == 9:
+                self.plot9.append(i)
+        self.plot_M2D(self.data, self.label)
+        # self.plot_s2(self.data,self.sample_label)
+
         endtime = datetime.datetime.now()
-        # self.top_k = self.prototype[importance_sorted[0:self.k],:]
-        # # self.plot_desicion()
-        # # self.plot_randomWalk()
-        # self.plot_result()
         return self.sample_label, (endtime - starttime)
 
     def sample_Data(self):
         # data = dim_reduction(data, 500)  # dimension reduction by PCA
         N = self.data.shape[0]
-        # plot input
-        self.input = self.data
         self.N = N
         self.sample_label = [-1] * N
         print(N)
@@ -143,12 +179,10 @@ class Dpcpp:
         np.random.shuffle(shulffle_N)
         # The first S of the input data are taken for Kmeans clustering
         kmeans_data = self.data[shulffle_N[0:self.s], :]
-        # plot shulffle
         self.shulffle = kmeans_data
         kmeans = KMeans(n_clusters=self.p, max_iter=3,random_state=0).fit(kmeans_data)
         kms_label = kmeans.labels_
         kms_center = kmeans.cluster_centers_    # Centers after kmeans clustering
-        # plot prototype
         self.prototype = kms_center
 
         data_to_kms = np.array(Euc_dist(self.data, kms_center))  # The distance matrix from each input sample to the Kmeans cluster center
@@ -266,7 +300,7 @@ class Dpcpp:
             self.center[i] = importance_sorted[i]
         return importance_sorted
 
-    def sample_cluster(self, importance_sorted, nneigh):
+    def sample_cluster(self, rho_sorted, nneigh):
         """
             Use the topK centers to cluster the modes
             params:
@@ -274,8 +308,8 @@ class Dpcpp:
                 nneigh: nearst neighbour of every point
         """
         for i in range(0, self.p):
-            if self.cluster[importance_sorted[i]] == -1:
-                self.cluster[importance_sorted[i]] = self.cluster[nneigh[importance_sorted[i]]]
+            if self.cluster[rho_sorted[i]] == -1:
+                self.cluster[rho_sorted[i]] = self.cluster[nneigh[rho_sorted[i]]]
 
     def DC_inter_dominance_estimation(self, rho, ndh, core_index, sort_rho_idx, similarity_mat):
         """
@@ -348,77 +382,115 @@ class Dpcpp:
 
     def plot_sample1(self, input, shulffle, prototype, top_k):
         plt.figure(figsize=[6.40, 5.60])
-        plt.scatter(x=input[:,0], y=input[:,1], marker=',',c='grey',alpha=0.5)
-        plt.title('MNIST_2D dataset')
+        plt.scatter(x=input[:,0], y=input[:,1], marker=',',c='gray',alpha=0.5)
+        # plt.title('MNIST_2D dataset')
         plt.show()
 
     def plot_sample2(self, input, shulffle, prototype, top_k):
         plt.figure(figsize=[6.40, 5.60])
-        plt.scatter(x=input[:,0], y=input[:,1], marker=',',c='grey',alpha=0.5)
-        plt.scatter(x=shulffle[:,0], y=shulffle[:,1], marker='.',c='blue',alpha=0.75)
-        plt.title("Sampled MNIST_2D dataset")
+        plt.scatter(x=input[:,0], y=input[:,1], marker=',',c='gray',alpha=0.5)
+        print(input[:,0])
+        plt.scatter(x=shulffle[:,0], y=shulffle[:,1], marker='.',c='black',alpha=0.75)
+        # plt.title("Sampled MNIST_2D dataset")
         plt.show()
 
     def plot_sample3(self, input, shulffle, prototype, top_k):
         plt.figure(figsize=[6.40, 5.60])
-        plt.scatter(x=input[:,0], y=input[:,1], marker=',',c='grey',alpha=0.5)
-        plt.scatter(x=shulffle[:,0], y=shulffle[:,1], marker='.',c='blue',alpha=0.75)
-        plt.scatter(x=prototype[:,0], y=prototype[:,1], marker='o',c='red',alpha=0.95)
-        plt.title("Prototypes in the MNIST_2D dataset")
+        plt.scatter(x=input[:,0], y=input[:,1], marker=',',c='gray',alpha=0.5)
+        plt.scatter(x=shulffle[:,0], y=shulffle[:,1], marker='.',c='black',alpha=0.75)
+        plt.scatter(x=prototype[:,0], y=prototype[:,1], marker='o',c='blue',alpha=0.95)
+        # plt.title("Prototypes in the MNIST_2D dataset")
         plt.show()
 
     def plot_sample4(self, input, shulffle, prototype, top_k):
         plt.figure(figsize=[6.40, 5.60])
-        plt.scatter(x=input[:,0], y=input[:,1], marker=',',c='grey',alpha=0.5)
-        plt.scatter(x=shulffle[:,0], y=shulffle[:,1], marker='.',c='blue',alpha=0.75)
-        plt.scatter(x=prototype[:,0], y=prototype[:,1], marker='o',c='red',alpha=0.95)
-        plt.scatter(x=top_k[:,0], y=top_k[:,1], marker='*',c='yellow')
-        plt.title("Modes in the MNIST_2D dataset")
+        plt.scatter(x=input[:,0], y=input[:,1], marker=',',c='gray',alpha=0.5)
+        plt.scatter(x=shulffle[:,0], y=shulffle[:,1], marker='.',c='black',alpha=0.75)
+        plt.scatter(x=prototype[:,0], y=prototype[:,1], marker='o',c='blue',alpha=0.95)
+        plt.scatter(x=top_k[:,0], y=top_k[:,1], marker='*',c='red', s=200)
+        # plt.title("Modes in the MNIST_2D dataset")
         plt.show()
 
-    def plot_sample(self, input, shulffle, prototype, top_k):
+    def plot_M2D(self, data, label):
         plt.figure(figsize=[6.40, 5.60])
-        plt.scatter(x=input[:,0], y=input[:,1], marker=',',c='grey',alpha=0.5)
-        plt.show()
-        plt.scatter(x=shulffle[:,0], y=shulffle[:,1], marker='.',c='blue',alpha=0.75)
-        plt.show()
-        plt.scatter(x=prototype[:,0], y=prototype[:,1], marker='o',c='red',alpha=0.95)
-        plt.show()
-        plt.scatter(x=top_k[:,0], y=top_k[:,1], marker='*',c='yellow')
-        plt.title("Modes in the MNIST_2D dataset")
+        # plt.rcParams['axes.facecolor']='white'
+        plt.style.use('default')
+        # plt.grid(False)
+        # print((data[self.plot0, 0], data[self.plot0, 1]))
+        plt.scatter(data[self.plot0, 0], data[self.plot0, 1], marker='.', c='#FFA500', alpha=0.5)
+        plt.scatter(data[self.plot1, 0], data[self.plot1, 1], marker='.', c='#87CEEB', alpha=0.5)
+        plt.scatter(data[self.plot2, 0], data[self.plot2, 1], marker='.', c='#FFB6C1', alpha=0.5)
+        plt.scatter(data[self.plot3, 0], data[self.plot3, 1], marker='.', c='#D3D3D3', alpha=0.5)
+        plt.scatter(data[self.plot4, 0], data[self.plot4, 1], marker='.', c='#D8BFD8', alpha=0.5)
+        plt.scatter(data[self.plot5, 0], data[self.plot5, 1], marker='.', c='#FA8072', alpha=0.5)
+        plt.scatter(data[self.plot6, 0], data[self.plot6, 1], marker='.', c='#F08080', alpha=0.5)
+        plt.scatter(data[self.plot7, 0], data[self.plot7, 1], marker='.', c='#4B0082', alpha=0.5)
+        plt.scatter(data[self.plot8, 0], data[self.plot8, 1], marker='.', c='#DEB887', alpha=0.5)
+        plt.scatter(data[self.plot9, 0], data[self.plot9, 1], marker='.', c='#808000', alpha=0.5)
+        plt.scatter(x=self.top_k[:,0], y=self.top_k[:,1], marker='*',c='red', s=200)
+
+        # plt.title('mnist result')
+
         plt.show()
 
-    def plot_randomWalk(self):
+    def plot_s2(self, data, label):
         plt.figure(figsize=[6.40, 5.60])
-        sns_plot = sns.heatmap(self.before_Walk, cmap='YlGnBu', xticklabels=False)
-        sns_plot.tick_params(labelsize=15)
-        plt.title("Heatmap before Random Walk")
+        for i in range(0, len(label)):
+            if label[i] == 0:
+                plt.scatter(data[i, 0], data[i, 1], marker='*', c='#FFA500', alpha=0.5)
+            elif label[i] == 1:
+                plt.scatter(data[i, 0], data[i, 1], marker='*', c='#87CEEB', alpha=0.5)
+            elif label[i] == 2:
+                plt.scatter(data[i, 0], data[i, 1], marker='*', c='#FFB6C1', alpha=0.5)
+            elif label[i] == 3:
+                plt.scatter(data[i, 0], data[i, 1], marker='*', c='#D3D3D3', alpha=0.5)
+            elif label[i] == 4:
+                plt.scatter(data[i, 0], data[i, 1], marker='.', c='#D8BFD8', alpha=0.5)
+            elif label[i] == 5:        
+                plt.scatter(data[i, 0], data[i, 1], marker='.', c='#FA8072', alpha=0.5)
+            elif label[i] == 6:          
+                plt.scatter(data[i, 0], data[i, 1], marker='.', c='#F08080', alpha=0.5)
+            elif label[i] == 7:        
+                plt.scatter(data[i, 0], data[i, 1], marker='.', c='#4B0082', alpha=0.5)
+            elif label[i] == 8:
+                plt.scatter(data[i, 0], data[i, 1], marker='.', c='#DEB887', alpha=0.5)
+            elif label[i] == 9:
+                plt.scatter(data[i, 0], data[i, 1], marker='.', c='#808000', alpha=0.5)
+            elif label[i] == 10:
+                 plt.scatter(data[i, 0], data[i, 1], marker='*', c='#FFD700', alpha=0.5)
+            elif label[i] == 11:
+                plt.scatter(data[i, 0], data[i, 1], marker='*', c='#ADFF2F', alpha=0.5)
+            elif label[i] == 12:
+                plt.scatter(data[i, 0], data[i, 1], marker='*', c='#2E8B57', alpha=0.5)
+            elif label[i] == 13:
+                plt.scatter(data[i, 0], data[i, 1], marker='*', c='#FFDAB9', alpha=0.5)
+            elif label[i] == 14:
+                plt.scatter(data[i, 0], data[i, 1], marker='*', c='#FF8C00', alpha=0.5)
+
         plt.show()
 
+    def plot_desicion(self, topK, rho, sim):
         plt.figure(figsize=[6.40, 5.60])
-        sns_plot = sns.heatmap(self.after_Walk, cmap='YlGnBu', yticklabels=False)
-        sns_plot.tick_params(labelsize=15)
-        plt.title("Heatmap after Random Walk")
-        plt.show()
-
-    def plot_desicion(self):
-        plt.figure(figsize=[6.40, 5.60])
-        for i in range(0, len(self.rho)):
-            if i == self.before_sort[0] or i == self.before_sort[1]:
-                plt.scatter(x=self.rho[i], y=1/self.before_sim[i], marker='.',c='red',alpha=0.95, s=200)
+        plt.style.use('default')
+        for i in range(0, len(rho)):
+            if i in topK[0:10]:
+                plt.scatter(x=rho[i], y=1/sim[i], marker='*',c='red',alpha=0.95, s=200)
             else:
-                plt.scatter(x=self.rho[i], y=1/self.before_sim[i], marker='.',c='grey',alpha=0.95)
-        plt.xlabel('rho')
-        plt.ylabel('delta')
-        plt.title('Desicion Map before Random Walk')
+                plt.scatter(x=rho[i], y=1/sim[i], marker='.',c='blue',alpha=0.95)
+        plt.xlabel(chr(961))
+        plt.ylabel(chr(948))
+        # plt.title('Desicion Map')
+        plt.show()
 
+    def plot_heatmap(self, mat):
         plt.figure(figsize=[6.40, 5.60])
-        for i in range(0, len(self.rho)):
-            if i == self.after_sort[0] or i == self.after_sort[1]:
-                plt.scatter(x=self.rho[i], y=1/self.after_sim[i], marker='.',c='red',alpha=0.95, s=200)
-            else:
-                plt.scatter(x=self.rho[i], y=1/self.after_sim[i], marker='.',c='grey',alpha=0.95)
-        plt.xlabel('rho')
-        plt.ylabel('delta')
-        plt.title('Desicion Map after Random Walk')
+        # cmap='RdBu_r' 颜色主题风格   xticklabels 代表步长
+        sns_plot = sns.heatmap(mat, cmap='YlGnBu', xticklabels=8, yticklabels=8)
+
+        sns_plot.tick_params(labelsize=15) # heatmap 刻度字体大小
+        # colorbar 刻度线设置
+        cax = plt.gcf().axes[-1]
+        cax.tick_params(labelsize=15) # colorbar 刻度字体大小
+
+        # fig.savefig("heatmap.pdf", bbox_inches='tight')
         plt.show()
