@@ -1,6 +1,3 @@
-"""
-Dpcpp_batch.py :DPC++ for Nxp large-scale Laplacian matrix calculation in batches.
-"""
 import numpy as np
 from scipy.sparse import csr_matrix, coo_matrix
 from sklearn.preprocessing import MinMaxScaler
@@ -9,6 +6,7 @@ from Dataprocessing import load_Data, load_Data2, get_data, Euc_dist, normalize_
 import datetime
 from sklearn.cluster import KMeans
 import random
+import matplotlib.pyplot as plt
 
 scaler = MinMaxScaler(feature_range=(0, 1))
 
@@ -81,7 +79,7 @@ def random_Walk_ECPCS(similarity_mat, length):
 
 class Dpcpp:
 
-    def __init__(self, data, label, s, p, l, r=150):
+    def __init__(self, data, label, s, p, l, r=100):
         self.data = data
         self. label = label
         self.s = s
@@ -105,9 +103,42 @@ class Dpcpp:
         nneigh, topK = self.DC_inter_dominance_estimation(rho, nneigh, core_index, sort_rho_idx, similarity_mat)
         if type(topK) == int:
             importance_sorted = self.topK_selection(sim, rho, self.k)
-            self.sample_cluster(importance_sorted, nneigh)
+            self.sample_cluster(sort_rho_idx, nneigh)
+        
+        # self.plot0 = []
+        # self.plot1 = []
+        # self.plot2 = []
+        # self.plot3 = []
+        # self.plot4 = []
+        # self.plot5 = []
+        # self.plot6 = []
+        # self.plot7 = []
+        # self.plot8 = []
+        # self.plot9 = []
         for i in range(0, N):
             self.sample_label[i] = self.cluster[index_return[i]]
+        #     if self.cluster[index_return[i]] == 0:
+        #         self.plot0.append(i)
+        #     elif self.cluster[index_return[i]] == 1:
+        #         self.plot1.append(i)
+        #     elif self.cluster[index_return[i]] == 2:
+        #         self.plot2.append(i)
+        #     elif self.cluster[index_return[i]] == 3:
+        #         self.plot3.append(i)
+        #     elif self.cluster[index_return[i]] == 4:
+        #         self.plot4.append(i)
+        #     elif self.cluster[index_return[i]] == 5:
+        #         self.plot5.append(i)
+        #     elif self.cluster[index_return[i]]== 6:
+        #         self.plot6.append(i)
+        #     elif self.cluster[index_return[i]] == 7:
+        #         self.plot7.append(i)
+        #     elif self.cluster[index_return[i]] == 8:
+        #         self.plot8.append(i)
+        #     elif self.cluster[index_return[i]] == 9:
+        #         self.plot9.append(i)
+        # print(nneigh)
+        # self.plot_spiral(self.data, self.sample_label)
         endtime = datetime.datetime.now()
         return self.sample_label, (endtime - starttime)
 
@@ -128,7 +159,7 @@ class Dpcpp:
         kms_center = kmeans.cluster_centers_    # Centers after kmeans clustering
         data_to_kms = np.zeros((self.N, self.p))
         for b in range(0, 100):
-            data = self.data[(int)(self.N*b/100):((int)(self.N*(b+1)/100)), :]
+            data = self.data[(int)(self.N*b/100):((int)(self.N*(b+1)/100)),:]
             data_to_kms_ = np.array(Euc_dist(data, kms_center))  # The distance matrix from each input sample to the Kmeans cluster center
             data_to_kms[(int)(self.N*b/100):((int)(self.N*(b+1)/100)), :] = data_to_kms_
         tmp_index2 = data_to_kms.argmin(axis=1)
@@ -245,7 +276,7 @@ class Dpcpp:
             self.center[i] = importance_sorted[i]
         return importance_sorted
 
-    def sample_cluster(self, importance_sorted, nneigh):
+    def sample_cluster(self, rho_sorted, nneigh):
         """
             Use the topK centers to cluster the modes
             params:
@@ -253,8 +284,8 @@ class Dpcpp:
                 nneigh: nearst neighbour of every point
         """
         for i in range(0, self.p):
-            if self.cluster[importance_sorted[i]] == -1:
-                self.cluster[importance_sorted[i]] = self.cluster[nneigh[importance_sorted[i]]]
+            if self.cluster[rho_sorted[i]] == -1:
+                self.cluster[rho_sorted[i]] = self.cluster[nneigh[rho_sorted[i]]]
 
     def DC_inter_dominance_estimation(self, rho, ndh, core_index, sort_rho_idx, similarity_mat):
         """
@@ -324,3 +355,20 @@ class Dpcpp:
             if label[i] == -1:
                 label[i] = label[cdh_ids[i]]
         return label
+    def plot_spiral(self, data, label):
+        plt.figure(figsize=[6.40, 5.60])
+        print((data[self.plot0, 0], data[self.plot0, 1]))
+        plt.scatter(data[self.plot0, 0], data[self.plot0, 1], marker='*', c='#FFA500', alpha=0.5)
+        plt.scatter(data[self.plot1, 0], data[self.plot1, 1], marker='*', c='#87CEEB', alpha=0.5)
+        plt.scatter(data[self.plot2, 0], data[self.plot2, 1], marker='*', c='#FFB6C1', alpha=0.5)
+        plt.scatter(data[self.plot3, 0], data[self.plot3, 1], marker='*', c='#D3D3D3', alpha=0.5)
+        plt.scatter(data[self.plot4, 0], data[self.plot4, 1], marker='*', c='#D8BFD8', alpha=0.5)
+        plt.scatter(data[self.plot5, 0], data[self.plot5, 1], marker='*', c='#FA8072', alpha=0.5)
+        plt.scatter(data[self.plot6, 0], data[self.plot6, 1], marker='*', c='#F08080', alpha=0.5)
+        plt.scatter(data[self.plot7, 0], data[self.plot7, 1], marker='*', c='#4B0082', alpha=0.5)
+        plt.scatter(data[self.plot8, 0], data[self.plot8, 1], marker='*', c='#DEB887', alpha=0.5)
+        plt.scatter(data[self.plot9, 0], data[self.plot9, 1], marker='*', c='#808000', alpha=0.5)
+
+
+        plt.title('Clustering result')
+        plt.show()

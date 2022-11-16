@@ -12,10 +12,9 @@
 
 ### Composition of folders
 
-* Main.py: Official version without parameter debugging.
-* Main_para.py: Version of robustness detection.
-* Main_debug.py: Parameter debugging version.
-* Dpcpp.py: DPC++ Laplacian matrix construction based on the pxN matrix version.
-* DPCpp_.py: DPC++ Laplacian matrix construction based on the Nxp matrix version.
-* Dpcpp_batch.py: DPC++ for Nxp large-scale Laplacian matrix calculation in batches.
+* Main.py
+* DPCpp_.py: The normal version of DPC++.
+* Dpcpp_batch.py: Batch version of DPC++.
+* Main_for8m.py
+* Dpcpp_for8m.py: DPC++ version designed to run mnist8m.
 * Dataprocessing.py:  Functions related to data normalization and unitary processing operations.
