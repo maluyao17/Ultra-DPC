@@ -3,7 +3,6 @@ import numpy as np
 from sklearn import preprocessing
 import scipy.io as sio
 from sklearn.metrics.pairwise import pairwise_distances
-import networkx as nx
 import random
 import h5py
 
