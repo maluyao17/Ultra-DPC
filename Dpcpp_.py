@@ -1,7 +1,3 @@
-"""
-DPCpp_.py :DPC++ Laplacian matrix construction based on the Nxp matrix version.
-"""
-from site import sethelper
 import numpy as np
 from scipy.sparse import csr_matrix, coo_matrix
 from sklearn.preprocessing import MinMaxScaler
