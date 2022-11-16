@@ -1,6 +1,3 @@
-"""
-Official version without parameter debugging.(Dpcpp_.py)
-"""
 from sklearn import metrics
 from Dataprocessing import get_emnist, load_Data, load_Data2, get_data, get_data2
 # from Dpcpp import Dpcpp
