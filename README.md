@@ -1,4 +1,4 @@
-## DPC++ : Random Walk in Local Density Peaks
+## DPC++:Clustering via Random Walk in Local Density Peaks
 
 ### Runtime environment
 
