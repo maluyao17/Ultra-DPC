@@ -1,4 +1,4 @@
-## DPC++:Clustering via Random Walk in Local Density Peaks
+## ULtra-DPC:Ultra-scalable and Index-free Density Peak Clustering
 
 ### Runtime environment
 
