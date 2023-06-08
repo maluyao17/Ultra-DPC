@@ -1,4 +1,4 @@
-## ULtra-DPC:Ultra-scalable and Index-free Density Peak Clustering
+## Ultra-DPC:Ultra-scalable and Index-free Density Peak Clustering
 
 ### Runtime environment
 
